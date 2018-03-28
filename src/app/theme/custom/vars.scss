@@ -2,10 +2,19 @@
 $enable-caret: true;
 $enable-rounded: false;
 $enable-shadows: true;
-$enable-gradients: true;
+$enable-gradients: false;
 $enable-transitions: true;
 $enable-hover-media-query: false; // Deprecated, no longer affects any compiled CSS
 $enable-grid-classes: true;
 $enable-print-styles: true;
 //colors
 $dropdown-border-color:transparent;
+//font
+$font-family-base: '-apple-system',
+'SF UI Text',
+'Arial',
+'PingFang SC',
+'Hiragino Sans GB',
+'Microsoft YaHei',
+'WenQuanYi Micro Hei',
+sans-serif !default;

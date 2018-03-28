@@ -1,0 +1,132 @@
+<nav class="navbar navbar-expand-sm  navbar-light bg-light fixed-top">
+    <a class="navbar-brand" href="#">网盘</a>
+    <button class="navbar-toggler hidden-lg-up" type="button" data-toggle="collapse" data-target="#collapsibleNavId" aria-controls="collapsibleNavId" aria-expanded="false" aria-label="Toggle navigation"></button>
+    <div class="collapse navbar-collapse" id="collapsibleNavId">
+        <ul class="navbar-nav mr-auto mt-2 mt-lg-0">
+            <li class="nav-item active">
+                <a class="nav-link" href="#">Home <span class="sr-only">(current)</span></a>
+            </li>
+        </ul>
+
+        <ul class="navbar-nav justify-content-end">
+            <li class="nav-item">
+                <a class="nav-link active" href="#">Active link</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#">Link</a>
+            </li>
+            <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" id="dropdownId1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="fas fa-user-circle"></i>Dropdown</a>
+                <div class="dropdown-menu" aria-labelledby="dropdownId1">
+                    <a class="dropdown-item" href="#">Action 111</a>
+                    <a class="dropdown-item" href="#">Action 2</a>
+                </div>
+            </li>
+
+        </ul>
+
+
+    </div>
+</nav>
+<div class="cc-layout flex-row align-items-stretch" style="height:100%;">
+    <div class="cc-sider border-right pt-3 bg-light" style="width:200px;">
+        <!-- <div class="list-group navbar-left">
+            <a href="#" class="list-group-item list-group-item-action border-0 active">
+                <app-icon fa="file-alt"></app-icon> 全部文件</a>
+            <a href="#" class="list-group-item list-group-item-action bg-light border-0">视频</a>
+            <a href="#" class="list-group-item list-group-item-action bg-light border-0">音乐</a>
+            <a href="#" class="list-group-item list-group-item-action bg-light border-0">文档</a>
+            <a href="#" class="list-group-item list-group-item-action bg-light border-0">图片</a>
+            <a href="#" class="list-group-item list-group-item-action bg-light border-0">其他</a>
+        </div> -->
+
+        <nav class="nav flex-column navbar-left">
+            <a class="nav-link active" href="#">
+                <app-icon class=" pr-1" fa="file-alt"></app-icon> 全部文件
+            </a>
+            <a class="nav-link" href="#">视频</a>
+            <a class="nav-link" href="#">音乐</a>
+            <a class="nav-link" href="#">文档</a>
+            <a class="nav-link" href="#">图片</a>
+            <a class="nav-link" href="#">其他</a>
+        </nav>
+
+    </div>
+    <div class="cc-layout flex-column">
+        <div class="cc-header p-2 bg-light">
+            <div class="toolbar">
+                <button type="button" class="btn btn-sm btn-primary"><app-icon fa="arrow-alt-circle-up"></app-icon> 上传</button>
+                <button type="button" class="btn btn-sm btn-primary" (click)="isCreating=!isCreating"><app-icon fa="folder"></app-icon> 新建文件夹</button>
+                <div class="btn-group m-auto" role="group">
+                    <button type="button" class="btn btn-sm btn-outline-secondary"><app-icon fa="share-square"></app-icon> 分享</button>
+                    <button type="button" class="btn btn-sm btn-outline-secondary">下载</button>
+                    <button type="button" class="btn btn-sm btn-outline-secondary">删除</button>
+                    <button type="button" class="btn btn-sm btn-outline-secondary">复制到</button>
+                    <button type="button" class="btn btn-sm btn-outline-secondary">重命名</button>
+                    <button type="button" class="btn btn-sm btn-outline-secondary">移动到</button>
+                    <button type="button" class="btn btn-sm btn-outline-secondary" (click)="alert();">推送到云设备</button>
+                </div>
+
+                <div class=" d-inline float-right">
+                    <button type="button" class="btn btn-sm" (click)="isTable = !isTable">切换排版</button>
+                </div>
+
+            </div>
+
+        </div>
+        <div class="cc-content thin-scroll">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="#">Home</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Library</li>
+                </ol>
+            </nav>
+
+            <!-- 大图标方式展现 -->
+            <ul *ngIf="!isTable" class="file-list d-flex flex-row flex-wrap">
+
+                <li *ngIf="isCreating" class="file-create-container d-flex flex-column align-items-center p-2">
+                    <img class="file-icon" src="https://pan.baidu.com/box-static/disk-system/widget/pageModule/list/img/Folder_54_fe544cc.png" class="figure-img img-fluid rounded" alt="A generic square placeholder image with rounded corners in a figure.">
+                    <div class="file-name text-center form-inline">
+                        <!-- <div class="form-group">
+                            <input type="text" style="padding: 0px;font-size: 12px;line-height: 12px;" class="form-control" name="fileName" id="fileName" aria-describedby="fileName" placeholder="folder name">
+                        </div> -->
+                        <div class="input-group">
+                            <input type="text" #folderDom class="form-control" style="padding: 3px 3px;width: 80px;font-size: 12px;" value="新建文件夹" placeholder="文件夹名称" aria-label="Recipient's username" aria-describedby="basic-addon2">
+                            <div class="input-group-append">
+                                <button class="btn btn-outline-success btn-sm" type="button" (click)="onCreateFolder(folderDom)"><i class="fas fa-check"></i></button>
+                                <button class="btn btn-outline-danger btn-sm" type="button" (click)="isCreating = false"><i class="fas fa-times "></i></button>
+                            </div>
+                        </div>
+                    </div>
+                </li>
+                <li class="file-item d-flex flex-column align-items-center p-2" *ngFor="let item of items">
+                    <img class="file-icon" src="https://pan.baidu.com/box-static/disk-system/widget/pageModule/list/img/Folder_54_fe544cc.png" class="figure-img img-fluid rounded" alt="A generic square placeholder image with rounded corners in a figure.">
+                    <div class="file-name text-center">{{item.name}}</div>
+                </li>
+            </ul>
+            <!-- 表格详细信息展现方式 -->
+            <ul *ngIf="isTable" class="file-list-column list-group">
+                <li class="file-item list-group-item " *ngFor="let item of items" style="border:0px; padding:0px 1rem;">
+
+                    <div class="row align-items-center" style="margin:0px;">
+                        <div class="col">aaa</div>
+                        <div class="col-6 d-flex align-items-center">
+                            <img class="file-icon mr-1" style="height:40px;" src="https://pan.baidu.com/box-static/disk-system/widget/pageModule/list/img/Folder_54_fe544cc.png">
+                            <div class="file-name text-center">{{item.name}}</div>
+                        </div>
+                        <div class="col">col</div>
+                        <div class="col-2">col-2</div>
+                    </div>
+
+
+                </li>
+            </ul>
+
+
+        </div>
+        <!-- <div class="cc-footer bg-light text-center" style="border: 1px solid rgba(0, 0, 0, 0.11);">
+            版权所有©xxx
+        </div> -->
+    </div>
+</div>
