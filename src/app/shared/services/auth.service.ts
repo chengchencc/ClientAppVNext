@@ -33,6 +33,7 @@ export class AuthService {
 
   authHeaders: Headers;
 
+  authHeaders2: HttpHeaders;
 
   constructor(private http: Http) {
 
@@ -224,7 +225,36 @@ export class AuthService {
   }
 
 
-  
+  public setAuthHeaders(user: any): void {
+    this.authHeaders2 = new HttpHeaders();
+    this.authHeaders2 = this.authHeaders2.append('Authorization', user.token_type + ' ' + user.access_token);
+    if (this.authHeaders2.get('Content-Type')) {
+
+    } else {
+      this.authHeaders2 = this.authHeaders2.append('Content-Type', 'application/json');
+    }
+  }
+  public setRequestOptions(options?: {
+    headers?: HttpHeaders ;
+    observe?: 'body';
+    params?: HttpParams | {
+        [param: string]: string | string[];
+    };
+    reportProgress?: boolean;
+    responseType?: 'json';
+    withCredentials?: boolean;
+}) {
+    if (this.loggedIn) {
+      this.setAuthHeaders(this.currentUser);
+    }
+    if (options) {
+      options.headers.append(this.authHeaders2.keys[0], this.authHeaders2[0]);
+    } else {
+      options = { headers: this.authHeaders2 };
+    }
+
+    return options;
+  }
 
 
 

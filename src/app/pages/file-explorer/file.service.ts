@@ -8,25 +8,19 @@ import { UserFolder } from './models';
 import { AuthService } from '../../shared/services/auth.service';
 
 @Injectable()
-export class FileService  {//extends MyCommonHttpClient
+export class FileService  extends MyCommonHttpClient{
 
-/**
- *
- */
-constructor(private authService: AuthService) {
-
-  
-}
 
   getFolders<T>(folderId:string){
 
-    return  this.authService.AuthGet(`http://localhost:88/api/UserFolders/${folderId}`).map(response=>response.json() as UserFolder[]);
+    // return  this.authService.AuthGet(`http://localhost:88/api/UserFolders/${folderId}`).map(response=>response.json() as UserFolder[]);
 
-    // return this.get<UserFolder[]>(`/api/UserFolders/${folderId}`);
+    return this.authGet<UserFolder[]>(`/api/UserFolders/${folderId}`);
   }
 
   createFolder(parentId,folder:UserFolder){
-    return this.authService.AuthPost(`http://localhost:88/api/UserFolders/${parentId}`,folder).map(d=>d.json() as UserFolder);
+    // return this.authService.AuthPost(`http://localhost:88/api/UserFolders/${parentId}`,folder).map(d=>d.json() as UserFolder);
+    return this.authPost(`/api/UserFolders/${parentId}`,folder);
   }
 
 }
