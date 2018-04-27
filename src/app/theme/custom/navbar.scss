@@ -1,0 +1,27 @@
+.navbar {
+    background-color: $primary;
+    @include box-shadow(0 1px 3px 0 rgba(0, 0, 0, .35));
+    .navbar-brand {
+        margin-left: 20px;
+    }
+    .navbar-nav .nav-link {
+        padding-right: .5rem;
+        padding-left: .5rem;
+        &.nav-link-icon {
+            padding-top: 0px;
+            padding-bottom: 0px;
+            .material-icons {
+                line-height: 1.5;
+            }
+        }
+        .fab,
+        .far,
+        .fas,
+        [data-prefix="fas"] {
+            font-size: 19px;
+        }
+    }
+    .navbar-nav .dropdown-menu {
+        position: absolute;
+    }
+}

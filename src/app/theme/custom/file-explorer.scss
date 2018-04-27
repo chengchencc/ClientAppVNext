@@ -1,6 +1,6 @@
 @import '../bootstrap/scss/_variables.scss';
 app-file-explorer {
-    padding-top: 51px;
+    // padding-top: 51px;
     height: 100%;
     display: block;
     font-size: 14px;
@@ -29,6 +29,7 @@ app-file-explorer {
             // height: 100px;
             // width: 100px;
             cursor: pointer;
+            position: relative;
             @include hover {
                 color: color-yiq($gray-200);
                 @include gradient-bg($gray-200);
@@ -38,6 +39,23 @@ app-file-explorer {
                 width: 90px;
                 font-size: 12px;
                 @include text-truncate();
+            }
+            .checkbox-flag {
+                display: none;
+                position: absolute;
+                left: 13px;
+                font-size: 25px;
+                top: 0px;
+                color: $gray-500;
+            }
+            .checkbox-flag.checked {
+                display: block;
+                color: $primary;
+            }
+            &:hover {
+                .checkbox-flag {
+                    display: block;
+                }
             }
         }
     }

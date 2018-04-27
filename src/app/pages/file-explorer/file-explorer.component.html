@@ -1,4 +1,4 @@
-<nav class="navbar navbar-expand-sm  navbar-light bg-light fixed-top">
+<!-- <nav class="navbar navbar-expand-sm  navbar-light bg-light fixed-top">
     <a class="navbar-brand" href="#">网盘</a>
     <button class="navbar-toggler hidden-lg-up" type="button" data-toggle="collapse" data-target="#collapsibleNavId" aria-controls="collapsibleNavId" aria-expanded="false" aria-label="Toggle navigation"></button>
     <div class="collapse navbar-collapse" id="collapsibleNavId">
@@ -9,17 +9,10 @@
         </ul>
 
         <ul class="navbar-nav justify-content-end">
-            <li class="nav-item">
-                <a class="nav-link active" href="#">Active link</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="#">Link</a>
-            </li>
             <li class="nav-item dropdown">
-                <a class="nav-link dropdown-toggle" href="#" id="dropdownId1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="fas fa-user-circle"></i>Dropdown</a>
+                <a class="nav-link dropdown-toggle" href="#" id="dropdownId1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="fas fa-user-circle"></i>{{user.profile.name}}</a>
                 <div class="dropdown-menu" aria-labelledby="dropdownId1">
-                    <a class="dropdown-item" href="#">Action 111</a>
-                    <a class="dropdown-item" href="#">Action 2</a>
+                    <a class="dropdown-item" href="" (click)="logout()">退出</a>
                 </div>
             </li>
 
@@ -27,9 +20,9 @@
 
 
     </div>
-</nav>
+</nav> -->
 <div class="cc-layout flex-row align-items-stretch" style="height:100%;">
-    <div class="cc-sider border-right pt-3 bg-light" style="width:200px;">
+    <div class="cc-sider border-right pt-3 bg-light" *ngIf="false" style="width:200px;">
         <!-- <div class="list-group navbar-left">
             <a href="#" class="list-group-item list-group-item-action border-0 active">
                 <app-icon fa="file-alt"></app-icon> 全部文件</a>
@@ -55,9 +48,11 @@
     <div class="cc-layout flex-column">
         <div class="cc-header p-2 bg-light">
             <div class="toolbar">
-                <button type="button" class="btn btn-sm btn-primary"><app-icon fa="arrow-alt-circle-up"></app-icon> 上传</button>
+                <button type="button" class="btn btn-sm btn-primary" (click)="uploadFileControl.click()"><app-icon fa="arrow-alt-circle-up"></app-icon> 上传
+                    <input type="file" style="display:none;" (change)="fileChange($event)" placeholder="Upload file" accept=".pdf,.doc,.docx" #uploadFileControl>
+                </button>
                 <button type="button" class="btn btn-sm btn-primary" (click)="isCreating=!isCreating"><app-icon fa="folder"></app-icon> 新建文件夹</button>
-                <div class="btn-group m-auto" role="group">
+                <div class="btn-group m-auto" role="group" *ngIf="selectedFolderOrFiles.length>0">
                     <button type="button" class="btn btn-sm btn-outline-secondary"><app-icon fa="share-square"></app-icon> 分享</button>
                     <button type="button" class="btn btn-sm btn-outline-secondary">下载</button>
                     <button type="button" class="btn btn-sm btn-outline-secondary">删除</button>
@@ -77,13 +72,15 @@
         <div class="cc-content thin-scroll">
             <nav aria-label="breadcrumb">
                 <ol class="breadcrumb">
-                    <li class="breadcrumb-item"><a href="#">Home</a></li>
-                    <li class="breadcrumb-item active" aria-current="page">Library</li>
+                    <li class="breadcrumb-item"><a (click)="goto($event,-1)">Home</a></li>
+                    <li class="breadcrumb-item active" aria-current="page" *ngFor="let item of path;let i=index;let last=last" (click)="goto($event,i)">{{item.name}}</li>
                 </ol>
             </nav>
 
+            <div class="loading-shim text-center" *ngIf="isLoading">加载中......</div>
+
             <!-- 大图标方式展现 -->
-            <ul *ngIf="!isTable" class="file-list d-flex flex-row flex-wrap">
+            <ul *ngIf="(!isLoading) && (!isTable)" class="file-list d-flex flex-row flex-wrap">
 
                 <li *ngIf="isCreating" class="file-create-container d-flex flex-column align-items-center p-2">
                     <img class="file-icon" src="https://pan.baidu.com/box-static/disk-system/widget/pageModule/list/img/Folder_54_fe544cc.png" class="figure-img img-fluid rounded" alt="A generic square placeholder image with rounded corners in a figure.">
@@ -100,14 +97,20 @@
                         </div>
                     </div>
                 </li>
-                <li class="file-item d-flex flex-column align-items-center p-2" *ngFor="let item of items">
+                <li class="file-item d-flex flex-column align-items-center p-2" *ngFor="let item of folders" (click)="onFolderClick(item)">
                     <img class="file-icon" src="https://pan.baidu.com/box-static/disk-system/widget/pageModule/list/img/Folder_54_fe544cc.png" class="figure-img img-fluid rounded" alt="A generic square placeholder image with rounded corners in a figure.">
-                    <div class="file-name text-center">{{item.name}}</div>
+                    <div class="file-name text-center" title="{{item.name}}">{{item.name}}</div>
+                    <div class="checkbox-flag" [ngClass]="{'checked': item.isSelected}" (click)="onFolderChecked(item,$event)"><i class="fas fa-check-circle"></i></div>
+                </li>
+                <li class="file-item d-flex flex-column align-items-center p-2" *ngFor="let item of files">
+                    <img class="file-icon" src="https://pan.baidu.com/box-static/file-widget-1/sysIcon/img/Misc_54_f86ddc2.png" class="figure-img img-fluid rounded" alt="A generic square placeholder image with rounded corners in a figure.">
+                    <div class="file-name text-center" title="{{item.name}}">{{item.name}}</div>
+                    <div class="checkbox-flag" [ngClass]="{'checked': item.isSelected}" (click)="onFolderChecked(item,$event)"><i class="fas fa-check-circle"></i></div>
                 </li>
             </ul>
             <!-- 表格详细信息展现方式 -->
-            <ul *ngIf="isTable" class="file-list-column list-group">
-                <li class="file-item list-group-item " *ngFor="let item of items" style="border:0px; padding:0px 1rem;">
+            <ul *ngIf="(!isLoading) && isTable" class="file-list-column list-group">
+                <li class="file-item list-group-item " *ngFor="let item of folders" (click)="onFolderClick(item)" style="border:0px; padding:0px 1rem;">
 
                     <div class="row align-items-center" style="margin:0px;">
                         <div class="col">aaa</div>
@@ -123,6 +126,36 @@
                 </li>
             </ul>
 
+
+            <!-- 上传列表 -->
+            <div class="card thin-scroll" *ngIf="showUploadPanel && uploadList.length>0" style="width:500px;height:300px;position: absolute;bottom:0px;right:10px;box-shadow: 0px 0px 7px #0000005e;">
+                <div class="card-header d-flex flex-row align-items-center" style="padding: 0.25rem 0.75rem;">
+                    <div class=" m-auto">上传列表</div>
+                    <div>
+                        <button type="button" class="btn btn-primary btn-sm" (click)="showUploadPanel = !showUploadPanel" data-toggle="button" aria-pressed="false" autocomplete="off">close</button>
+                    </div>
+                </div>
+                <!-- <div class="card-body">
+                    <h4 class="card-title">Title</h4>
+                    <p class="card-text">Text</p>
+                </div> -->
+
+                <ul class="list-group">
+                    <li class="list-group-item list-group-item-success" *ngFor="let item of uploadList" style="border:0px;">
+                        <div class="row align-items-center">
+                            <div class="col-6">{{item.file.name}}</div>
+                            <div class="col-3">
+                                {{item.file.size | dsFileSize}}
+                            </div>
+                            <!-- <div class="col-3">{{item.folder}}</div> -->
+                            <div class="col-3">{{item.progress}}</div>
+                        </div>
+
+                    </li>
+
+                </ul>
+
+            </div>
 
         </div>
         <!-- <div class="cc-footer bg-light text-center" style="border: 1px solid rgba(0, 0, 0, 0.11);">

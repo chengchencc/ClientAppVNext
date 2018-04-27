@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { NzMessageService } from 'ng-zorro-antd';
 
 @Component({
   selector: 'app-upload-demo',
@@ -7,9 +8,13 @@ import { Component, OnInit } from '@angular/core';
 })
 export class UploadDemoComponent implements OnInit {
 
-  constructor() { }
+  constructor(private _message: NzMessageService) { }
 
   ngOnInit() {
   }
 
+
+  showMessage(event){
+    this._message.info("这是一条提示信息！");
+  }
 }

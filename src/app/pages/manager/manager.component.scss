@@ -1,0 +1,81 @@
+// $primary :#6f42c1;
+// @import '../../theme/bootstrap/scss/_functions.scss';
+// @import '../../theme/bootstrap/scss/_variables.scss';
+@import '../../theme/custom/vars.scss';
+@import '../../theme/bootstrap/scss/_functions.scss';
+@import '../../theme/bootstrap/scss/_variables.scss';
+@import '../../theme/bootstrap/scss/_mixins.scss';
+.sidebar {
+    height: calc(100vh - 57px)!important;
+    position: relative;
+    margin-top: 56px;
+    flex: 0 0 0px;
+    flex: 0 0 60px;
+    font-size: 20px;
+    width: 0px;
+    // position: fixed;
+    // top: 56px;
+    // bottom: 0;
+    // left: 0;
+    // width: 0px;
+    z-index: 100;
+    padding: 0;
+    padding-top: 20px;
+    box-shadow: inset -1px 0 0 rgba(0, 0, 0, .1);
+    transform: translate3d(0, 0, 0);
+    transition: .25s ease;
+    overflow-x: hidden;
+    .nav .nav-link {
+        border-left: 3px solid transparent;
+        // height: 50px;
+        i {
+            margin-right: 50px;
+            transition: .25s ease;
+        }
+        white-space: nowrap;
+        color: rgba(255, 255, 255, 0.5);
+        @include transition();
+        &:hover,
+        &.active {
+            border-left-color: color("white");
+            // background-color: $light;
+            color: color("white");
+        }
+    }
+    &.expanded {
+        flex: 0 0 200px;
+        font-size: 16px;
+        .nav .nav-link i {
+            margin-right: 5px;
+        }
+    }
+}
+
+.sidebar.bg-light {
+    .nav .nav-link {
+        color: $gray-600;
+        &:hover,
+        &.active {
+            border-left-color: $primary;
+            // background-color: $light;
+            color: $primary;
+        }
+    }
+}
+
+.content {
+    height: calc(100vh - 56px) !important;
+    margin-left: 0px;
+    transition: .25s ease;
+    flex: auto;
+    margin-top: 56px;
+    overflow: auto;
+    // &.expanded {
+    //     margin-left: 200px;
+    // }
+}
+
+.my-button {
+    @include button-variant(#ea4335, #ea4335);
+    // @include button-variant($value, $value);
+}

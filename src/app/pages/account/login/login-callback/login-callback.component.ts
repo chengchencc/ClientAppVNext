@@ -9,7 +9,7 @@ import { Router } from '@angular/router';
 })
 export class LoginCallbackComponent implements OnInit {
 
-  private user:any;
+  public user:any;
 
   constructor(private authService:AuthService,private router: Router) {
 

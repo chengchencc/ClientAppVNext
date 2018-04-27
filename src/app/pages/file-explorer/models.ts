@@ -63,8 +63,10 @@ export class VirtualFile extends EntityBase<string>
 }
 export class UserFile extends VirtualFile {
   public userId: string;
+  public isSelected:boolean;
 }
 export class UserFolder extends AppFolder<UserFile, UserFolder>
 {
   public userId: string;
+  public isSelected:boolean;
 }

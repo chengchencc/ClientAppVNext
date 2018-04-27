@@ -1,0 +1,82 @@
+@import '../../../theme/bootstrap/scss/bootstrap-reboot.scss';
+@import '../../../../../node_modules/dragula/dist/dragula.css';
+// @import '../../../theme/bootstrap/scss/_card.scss';
+.board {
+    display: flex;
+    height: 100%;
+    width: 100%;
+    flex-direction: column;
+    // background-color: $secondary;
+    // background-image: url(https://trello-backgrounds.s3.amazonaws.com/SharedBackground/2560x1579/8eac3fe8893a8c3f08f4ebcf40d60dc0/photo-1523897056079-5553b57112d4);
+    background-size: 100%;
+}
+
+.board-header {}
+
+.board-toolbar {
+    display: flex;
+}
+
+.board-content {
+    height: 100%;
+    display: flex;
+    flex-direction: row;
+    align-items: stretch;
+    padding: 0px 5px 5px 5px;
+}
+
+.task-list-wrapper {
+    // height: 100%;
+    // width: 25%;
+}
+
+.task-list {
+    width: 300px;
+    max-height: 100%;
+    display: flex;
+    flex-direction: column;
+    background-color: #e2e4e6;
+    border-radius: 3px;
+    margin: 0px 5px;
+    // height: 100%;
+    .task-list-header {
+        background-color: #fff;
+        border-radius: 3px 3px 0 0;
+        padding: 8px;
+        padding-right: 34px;
+        min-height: 20px;
+        -webkit-box-shadow: inset 0 -1px 0 0 #d6dadc;
+        box-shadow: inset 0 -1px 0 0 #d6dadc;
+        flex: 1 0 auto;
+        position: relative;
+        h4,
+        h5,
+        h6 {
+            margin-bottom: 0px;
+        }
+        .btn {
+            position: absolute;
+            right: 0px;
+            top: 0px;
+        }
+    }
+    .task-list-body {
+        margin-bottom: 0px;
+        padding-left: 0px;
+        padding: 0px 5px 5px;
+    }
+}
+
+.task {
+    flex: none;
+    margin-top: 5px;
+    cursor: pointer;
+    border: 0px;
+    border-bottom: 1px solid #ccc;
+    // position: relative;
+    // text-decoration: none;
+    &:hover {
+        background-color: #edeff0;
+        border-bottom-color: #d6dadc;
+    }
+}

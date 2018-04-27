@@ -2,12 +2,13 @@ import { Injectable, EventEmitter } from '@angular/core';
 import { Http, Headers, RequestOptions, Response } from '@angular/http';
 import { Observable } from 'rxjs/Rx';
 
-import { UserManager, User, UserManagerSettings } from 'oidc-client/lib/oidc-client';
+import { UserManager, User, UserManagerSettings } from 'oidc-client/';
 import { environment } from '../../../environments/environment';
 import { HttpHeaders, HttpParams } from '@angular/common/http';
+import { AppConfig } from '../app-config';
 
 const settings: UserManagerSettings = {
-  authority: 'http://localhost:5001',
+  authority: AppConfig.authServer,
   client_id: 'js',
   redirect_uri: 'http://localhost:4200/account/loginCallback',
   post_logout_redirect_uri: 'http://localhost:4200/index.html',
@@ -123,6 +124,11 @@ export class AuthService {
       console.log(err);
     });
   }
+
+  reLogin(){
+    this.mgr.signinSilent()
+  }
+
 
   startSignoutMainWindow() {
     this.mgr.getUser().then(user => {
@@ -256,7 +262,15 @@ export class AuthService {
     return options;
   }
 
+public setAuthHeader(headers:HttpHeaders){
 
+  if(!this.loggedIn || !this.currentUser) throw new Error("need to login!");
+  
+  if(!headers.has("Authorization")){
+    headers = headers.append('Authorization', this.currentUser.token_type + ' ' + this.currentUser.access_token);
+  }
+  return  headers;
+}
 
 
 

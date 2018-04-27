@@ -23,7 +23,9 @@
         ],
         "scripts": [
             "../node_modules/jquery/jquery.min.js",
-            "../node_modules/bootstrap/dist/js/bootstrap.min.js"
+            "../node_modules/bootstrap/dist/js/bootstrap.min.js",
+            "../node_modules/echarts/dist/echarts.min.js",
+            "../node_modules/echarts/theme/macarons.js"
 
         ],
         "environmentSource": "environments/environment.ts",

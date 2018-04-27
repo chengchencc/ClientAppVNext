@@ -1,0 +1,23 @@
+@import '../bootstrap/scss/mixins/_buttons.scss';
+.btn.btn-nostyle {
+    @include button-variant(transparent, transparent, transparent, transparent, transparent, transparent);
+    box-shadow: none;
+    outline: none;
+    &:focus,
+    &:active {
+        box-shadow: none;
+        outline: none;
+    }
+}
+
+//.btn:not(:disabled):not(.disabled):active,
+// .btn:not(:disabled):not(.disabled).active,
+.btn-nostyle:not(:disabled):not(.disabled):active:focus,
+.btn-nostyle:not(:disabled):not(.disabled).active:focus,
+.show>.btn-nostyle.dropdown-toggle:focus,
+.btn.btn-nostyle:not(:disabled):not(.disabled):active:focus,
+.btn.btn-nostyle:not(:disabled):not(.disabled).active:focus,
+.show>.btn.btn-nostyle.dropdown-toggle:focus {
+    box-shadow: none;
+    outline: none;
+}

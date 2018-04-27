@@ -1,6 +1,6 @@
 //开关
 $enable-caret: true;
-$enable-rounded: false;
+$enable-rounded: true;
 $enable-shadows: true;
 $enable-gradients: false;
 $enable-transitions: true;
@@ -8,7 +8,7 @@ $enable-hover-media-query: false; // Deprecated, no longer affects any compiled 
 $enable-grid-classes: true;
 $enable-print-styles: true;
 //colors
-$dropdown-border-color:transparent;
+// $dropdown-border-color:transparent;
 //font
 $font-family-base: '-apple-system',
 'SF UI Text',
@@ -18,3 +18,6 @@ $font-family-base: '-apple-system',
 'Microsoft YaHei',
 'WenQuanYi Micro Hei',
 sans-serif !default;
+$primary:#563d7c; //#6f42c1; //#343a40;
+// $primary:#6610f2;
+$grid-gutter-width:15px;

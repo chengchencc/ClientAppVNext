@@ -1,0 +1,72 @@
+<nav class="navbar navbar-dark fixed-top">
+    <button class="navbar-toggler" (click)="toggleSideBar()">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+    <!-- brand -->
+    <a class="navbar-brand" href="#">Epp Cloud</a>
+
+    <ul class="navbar-nav flex-row mr-auto mt-2 mt-lg-0">
+        <li class="nav-item active">
+            <a class="nav-link" href="#">Home </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="#">Link</a>
+        </li>
+        <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" id="dropdownId" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Dropdown</a>
+            <div class="dropdown-menu" aria-labelledby="dropdownId">
+                <a class="dropdown-item" href="#">Action 1</a>
+                <a class="dropdown-item" href="#">Action 2</a>
+            </div>
+        </li>
+    </ul>
+
+    <ul class="navbar-nav flex-row mt-2 mt-lg-0">
+
+        <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" id="dropdownId" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="fas fa-th-large"></i></a>
+            <div class="dropdown-menu" aria-labelledby="dropdownId">
+                <a class="dropdown-item" *ngFor="let item of ['primary','dark','light']" (click)="changeSidebarTheme(item)">{{item}}</a>
+            </div>
+        </li>
+
+        <li class="nav-item">
+            <a class="nav-link" href="#"><i class="fab fa-sistrix"></i></a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="#"><i class="fas fa-bell"></i></a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link nav-link-icon" (click)="toogleSidebarPosition()"><img style="width:40px" class="rounded-circle" src="http://akveo.com/ngx-admin/assets/images/nick.png" /></a>
+        </li>
+    </ul>
+
+
+    <!-- <form class="form-inline my-2 my-lg-0">
+        <input class="form-control mr-sm-2" type="text" placeholder="Search">
+        <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
+    </form> -->
+</nav>
+
+<div class="d-flex" [class.flex-row-reverse]="isSidebarRight">
+
+    <div class="sidebar thin-scroll {{getSidebarTheme}}">
+        <!-- this is sidebar menu -->
+        <nav class="nav flex-column">
+            <a class="nav-link" [routerLink]="[ 'dashboard' ]" routerLinkActive="active"> <i class="fas fa-tachometer-alt"></i> Dashboard</a>
+            <a class="nav-link" [routerLink]="[ 'file' ]" routerLinkActive="active"><i class="fas fa-folder"></i> File Explorer</a>
+            <a class="nav-link" [routerLink]="[ 'page' ]" routerLinkActive="active"><i class="fas fa-question-circle"></i> Page Manager</a>
+            <a class="nav-link" href="#"><i class="fas fa-question-circle"></i> Data Source</a>
+            <a class="nav-link" href="#"><i class="fas fa-question-circle"></i> Content</a>
+
+        </nav>
+
+    </div>
+    <div class="content">
+        <!-- this is main content -->
+
+        <router-outlet></router-outlet>
+
+    </div>
+
+</div>

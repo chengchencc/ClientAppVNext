@@ -6,6 +6,7 @@ html {
 body {
     width: 100%;
     height: 100%;
+    // background: red;
 }
 
 .dls-thin-scroll,
@@ -18,11 +19,12 @@ body {
         height: 7px;
     }
     &::-webkit-scrollbar-thumb {
-        background-color: #a6a6a6;
+        background-color: #a6a6a6; // lighten($primary, 10.5%); //#a6a6a6;
         border-left: 2px solid transparent;
+        border-radius: 10px;
     }
     &::-webkit-scrollbar-track {
-        background-color: #e5e5e5;
+        background-color: #e5e5e5; //lighten($primary, 30.5%); //#e5e5e5;
         border-left: 2px solid transparent;
     }
 }
@@ -30,7 +32,7 @@ body {
 //
 // Fix navbar.
 // 
-.navbar {
+.navbar2 {
     // Use fixed height to reduce problems with dynamic elements.
     & {
         // height: $size-navbar-height;
@@ -63,4 +65,12 @@ body {
             color: white;
         }
     }
+}
+
+.fullPageTransition {
+    // position: relative;
+    // display: block;
+    transform-origin: 50vw 50vh;
+    transform: perspective(1000px) translate3d(0, 50vh, 0) rotate3d(1, 0, 0, 30deg);
+    transition: transform .5s cubic-bezier(.2, 1, .3, 1), -webkit-transform .5s cubic-bezier(.2, 1, .3, 1);
 }

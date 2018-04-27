@@ -24,6 +24,10 @@ const routes: Routes = [
     loadChildren:'app/pages/file-explorer/file-explorer.module#FileExplorerModule'
   },
   {
+    path:'manager',
+    loadChildren:'app/pages/manager/manager.module#ManagerModule'
+  },
+  {
     path: '**',
     redirectTo: 'home'
   }
