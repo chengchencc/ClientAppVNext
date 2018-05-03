@@ -24,7 +24,78 @@ import * as moment from 'moment';
 export const API_BASE_URL = new InjectionToken<string>('API_BASE_URL');
 
 @Injectable()
-export class AppCrudServiceProxy {
+export class AuthServiceProxy {
+    private http: HttpClient;
+    private baseUrl: string;
+    protected jsonParseReviver: ((key: string, value: any) => any) | undefined = undefined;
+
+    constructor(@Inject(HttpClient) http: HttpClient, @Optional() @Inject(API_BASE_URL) baseUrl?: string) {
+        this.http = http;
+        this.baseUrl = baseUrl ? baseUrl : "";
+    }
+
+    /**
+     * @rememberMe (optional) 
+     * @return Success
+     */
+    login(email: string, password: string, rememberMe: boolean | null | undefined): Observable<void> {
+        let url_ = this.baseUrl + "/api/Auth/Login?";
+        if (email === undefined || email === null)
+            throw new Error("The parameter 'email' must be defined and cannot be null.");
+        else
+            url_ += "Email=" + encodeURIComponent("" + email) + "&"; 
+        if (password === undefined || password === null)
+            throw new Error("The parameter 'password' must be defined and cannot be null.");
+        else
+            url_ += "Password=" + encodeURIComponent("" + password) + "&"; 
+        if (rememberMe !== undefined)
+            url_ += "RememberMe=" + encodeURIComponent("" + rememberMe) + "&"; 
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_ : any = {
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+                "Content-Type": "application/json", 
+            })
+        };
+
+        return this.http.request("get", url_, options_).flatMap((response_ : any) => {
+            return this.processLogin(response_);
+        }).catch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processLogin(<any>response_);
+                } catch (e) {
+                    return <Observable<void>><any>Observable.throw(e);
+                }
+            } else
+                return <Observable<void>><any>Observable.throw(response_);
+        });
+    }
+
+    protected processLogin(response: HttpResponseBase): Observable<void> {
+        const status = response.status;
+        const responseBlob = 
+            response instanceof HttpResponse ? response.body : 
+            (<any>response).error instanceof Blob ? (<any>response).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }};
+        if (status === 200) {
+            return blobToText(responseBlob).flatMap(_responseText => {
+            return Observable.of<void>(<any>null);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).flatMap(_responseText => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Observable.of<void>(<any>null);
+    }
+}
+
+@Injectable()
+export class DemoServiceProxy {
     private http: HttpClient;
     private baseUrl: string;
     protected jsonParseReviver: ((key: string, value: any) => any) | undefined = undefined;
@@ -37,8 +108,8 @@ export class AppCrudServiceProxy {
     /**
      * @return Success
      */
-    getApps(): Observable<AppInfo[]> {
-        let url_ = this.baseUrl + "/api/AppCrud/GetApps";
+    getAll(): Observable<void> {
+        let url_ = this.baseUrl + "/api/Demo/GetAll";
         url_ = url_.replace(/[?&]$/, "");
 
         let options_ : any = {
@@ -46,25 +117,24 @@ export class AppCrudServiceProxy {
             responseType: "blob",
             headers: new HttpHeaders({
                 "Content-Type": "application/json", 
-                "Accept": "application/json"
             })
         };
 
         return this.http.request("get", url_, options_).flatMap((response_ : any) => {
-            return this.processGetApps(response_);
+            return this.processGetAll(response_);
         }).catch((response_: any) => {
             if (response_ instanceof HttpResponseBase) {
                 try {
-                    return this.processGetApps(<any>response_);
+                    return this.processGetAll(<any>response_);
                 } catch (e) {
-                    return <Observable<AppInfo[]>><any>Observable.throw(e);
+                    return <Observable<void>><any>Observable.throw(e);
                 }
             } else
-                return <Observable<AppInfo[]>><any>Observable.throw(response_);
+                return <Observable<void>><any>Observable.throw(response_);
         });
     }
 
-    protected processGetApps(response: HttpResponseBase): Observable<AppInfo[]> {
+    protected processGetAll(response: HttpResponseBase): Observable<void> {
         const status = response.status;
         const responseBlob = 
             response instanceof HttpResponse ? response.body : 
@@ -73,21 +143,14 @@ export class AppCrudServiceProxy {
         let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }};
         if (status === 200) {
             return blobToText(responseBlob).flatMap(_responseText => {
-            let result200: any = null;
-            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
-            if (resultData200 && resultData200.constructor === Array) {
-                result200 = [];
-                for (let item of resultData200)
-                    result200.push(AppInfo.fromJS(item));
-            }
-            return Observable.of(result200);
+            return Observable.of<void>(<any>null);
             });
         } else if (status !== 200 && status !== 204) {
             return blobToText(responseBlob).flatMap(_responseText => {
             return throwException("An unexpected server error occurred.", status, _responseText, _headers);
             });
         }
-        return Observable.of<AppInfo[]>(<any>null);
+        return Observable.of<void>(<any>null);
     }
 }
 
@@ -100,315 +163,6 @@ export class ApiServiceProxy {
     constructor(@Inject(HttpClient) http: HttpClient, @Optional() @Inject(API_BASE_URL) baseUrl?: string) {
         this.http = http;
         this.baseUrl = baseUrl ? baseUrl : "";
-    }
-
-    /**
-     * @return Success
-     */
-    appCrudGet(id: number): Observable<void> {
-        let url_ = this.baseUrl + "/api/AppCrud/{id}";
-        if (id === undefined || id === null)
-            throw new Error("The parameter 'id' must be defined.");
-        url_ = url_.replace("{id}", encodeURIComponent("" + id)); 
-        url_ = url_.replace(/[?&]$/, "");
-
-        let options_ : any = {
-            observe: "response",
-            responseType: "blob",
-            headers: new HttpHeaders({
-                "Content-Type": "application/json", 
-            })
-        };
-
-        return this.http.request("get", url_, options_).flatMap((response_ : any) => {
-            return this.processAppCrudGet(response_);
-        }).catch((response_: any) => {
-            if (response_ instanceof HttpResponseBase) {
-                try {
-                    return this.processAppCrudGet(<any>response_);
-                } catch (e) {
-                    return <Observable<void>><any>Observable.throw(e);
-                }
-            } else
-                return <Observable<void>><any>Observable.throw(response_);
-        });
-    }
-
-    protected processAppCrudGet(response: HttpResponseBase): Observable<void> {
-        const status = response.status;
-        const responseBlob = 
-            response instanceof HttpResponse ? response.body : 
-            (<any>response).error instanceof Blob ? (<any>response).error : undefined;
-
-        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }};
-        if (status === 200) {
-            return blobToText(responseBlob).flatMap(_responseText => {
-            return Observable.of<void>(<any>null);
-            });
-        } else if (status !== 200 && status !== 204) {
-            return blobToText(responseBlob).flatMap(_responseText => {
-            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
-            });
-        }
-        return Observable.of<void>(<any>null);
-    }
-
-    /**
-     * @entity (optional) 
-     * @return Success
-     */
-    appCrudPut(id: number, entity: AppInfo | null | undefined): Observable<void> {
-        let url_ = this.baseUrl + "/api/AppCrud/{id}";
-        if (id === undefined || id === null)
-            throw new Error("The parameter 'id' must be defined.");
-        url_ = url_.replace("{id}", encodeURIComponent("" + id)); 
-        url_ = url_.replace(/[?&]$/, "");
-
-        const content_ = JSON.stringify(entity);
-
-        let options_ : any = {
-            body: content_,
-            observe: "response",
-            responseType: "blob",
-            headers: new HttpHeaders({
-                "Content-Type": "application/json", 
-            })
-        };
-
-        return this.http.request("put", url_, options_).flatMap((response_ : any) => {
-            return this.processAppCrudPut(response_);
-        }).catch((response_: any) => {
-            if (response_ instanceof HttpResponseBase) {
-                try {
-                    return this.processAppCrudPut(<any>response_);
-                } catch (e) {
-                    return <Observable<void>><any>Observable.throw(e);
-                }
-            } else
-                return <Observable<void>><any>Observable.throw(response_);
-        });
-    }
-
-    protected processAppCrudPut(response: HttpResponseBase): Observable<void> {
-        const status = response.status;
-        const responseBlob = 
-            response instanceof HttpResponse ? response.body : 
-            (<any>response).error instanceof Blob ? (<any>response).error : undefined;
-
-        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }};
-        if (status === 200) {
-            return blobToText(responseBlob).flatMap(_responseText => {
-            return Observable.of<void>(<any>null);
-            });
-        } else if (status !== 200 && status !== 204) {
-            return blobToText(responseBlob).flatMap(_responseText => {
-            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
-            });
-        }
-        return Observable.of<void>(<any>null);
-    }
-
-    /**
-     * @return Success
-     */
-    appCrudDelete(id: number): Observable<void> {
-        let url_ = this.baseUrl + "/api/AppCrud/{id}";
-        if (id === undefined || id === null)
-            throw new Error("The parameter 'id' must be defined.");
-        url_ = url_.replace("{id}", encodeURIComponent("" + id)); 
-        url_ = url_.replace(/[?&]$/, "");
-
-        let options_ : any = {
-            observe: "response",
-            responseType: "blob",
-            headers: new HttpHeaders({
-                "Content-Type": "application/json", 
-            })
-        };
-
-        return this.http.request("delete", url_, options_).flatMap((response_ : any) => {
-            return this.processAppCrudDelete(response_);
-        }).catch((response_: any) => {
-            if (response_ instanceof HttpResponseBase) {
-                try {
-                    return this.processAppCrudDelete(<any>response_);
-                } catch (e) {
-                    return <Observable<void>><any>Observable.throw(e);
-                }
-            } else
-                return <Observable<void>><any>Observable.throw(response_);
-        });
-    }
-
-    protected processAppCrudDelete(response: HttpResponseBase): Observable<void> {
-        const status = response.status;
-        const responseBlob = 
-            response instanceof HttpResponse ? response.body : 
-            (<any>response).error instanceof Blob ? (<any>response).error : undefined;
-
-        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }};
-        if (status === 200) {
-            return blobToText(responseBlob).flatMap(_responseText => {
-            return Observable.of<void>(<any>null);
-            });
-        } else if (status !== 200 && status !== 204) {
-            return blobToText(responseBlob).flatMap(_responseText => {
-            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
-            });
-        }
-        return Observable.of<void>(<any>null);
-    }
-
-    /**
-     * @entity (optional) 
-     * @return Success
-     */
-    appCrudPost(entity: AppInfo | null | undefined): Observable<void> {
-        let url_ = this.baseUrl + "/api/AppCrud";
-        url_ = url_.replace(/[?&]$/, "");
-
-        const content_ = JSON.stringify(entity);
-
-        let options_ : any = {
-            body: content_,
-            observe: "response",
-            responseType: "blob",
-            headers: new HttpHeaders({
-                "Content-Type": "application/json", 
-            })
-        };
-
-        return this.http.request("post", url_, options_).flatMap((response_ : any) => {
-            return this.processAppCrudPost(response_);
-        }).catch((response_: any) => {
-            if (response_ instanceof HttpResponseBase) {
-                try {
-                    return this.processAppCrudPost(<any>response_);
-                } catch (e) {
-                    return <Observable<void>><any>Observable.throw(e);
-                }
-            } else
-                return <Observable<void>><any>Observable.throw(response_);
-        });
-    }
-
-    protected processAppCrudPost(response: HttpResponseBase): Observable<void> {
-        const status = response.status;
-        const responseBlob = 
-            response instanceof HttpResponse ? response.body : 
-            (<any>response).error instanceof Blob ? (<any>response).error : undefined;
-
-        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }};
-        if (status === 200) {
-            return blobToText(responseBlob).flatMap(_responseText => {
-            return Observable.of<void>(<any>null);
-            });
-        } else if (status !== 200 && status !== 204) {
-            return blobToText(responseBlob).flatMap(_responseText => {
-            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
-            });
-        }
-        return Observable.of<void>(<any>null);
-    }
-
-    /**
-     * @return Success
-     */
-    demoGetAll(): Observable<void> {
-        let url_ = this.baseUrl + "/api/Demo";
-        url_ = url_.replace(/[?&]$/, "");
-
-        let options_ : any = {
-            observe: "response",
-            responseType: "blob",
-            headers: new HttpHeaders({
-                "Content-Type": "application/json", 
-            })
-        };
-
-        return this.http.request("get", url_, options_).flatMap((response_ : any) => {
-            return this.processDemoGetAll(response_);
-        }).catch((response_: any) => {
-            if (response_ instanceof HttpResponseBase) {
-                try {
-                    return this.processDemoGetAll(<any>response_);
-                } catch (e) {
-                    return <Observable<void>><any>Observable.throw(e);
-                }
-            } else
-                return <Observable<void>><any>Observable.throw(response_);
-        });
-    }
-
-    protected processDemoGetAll(response: HttpResponseBase): Observable<void> {
-        const status = response.status;
-        const responseBlob = 
-            response instanceof HttpResponse ? response.body : 
-            (<any>response).error instanceof Blob ? (<any>response).error : undefined;
-
-        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }};
-        if (status === 200) {
-            return blobToText(responseBlob).flatMap(_responseText => {
-            return Observable.of<void>(<any>null);
-            });
-        } else if (status !== 200 && status !== 204) {
-            return blobToText(responseBlob).flatMap(_responseText => {
-            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
-            });
-        }
-        return Observable.of<void>(<any>null);
-    }
-
-    /**
-     * @value (optional) 
-     * @return Success
-     */
-    demoPost(value: string | null | undefined): Observable<void> {
-        let url_ = this.baseUrl + "/api/Demo";
-        url_ = url_.replace(/[?&]$/, "");
-
-        const content_ = JSON.stringify(value);
-
-        let options_ : any = {
-            body: content_,
-            observe: "response",
-            responseType: "blob",
-            headers: new HttpHeaders({
-                "Content-Type": "application/json", 
-            })
-        };
-
-        return this.http.request("post", url_, options_).flatMap((response_ : any) => {
-            return this.processDemoPost(response_);
-        }).catch((response_: any) => {
-            if (response_ instanceof HttpResponseBase) {
-                try {
-                    return this.processDemoPost(<any>response_);
-                } catch (e) {
-                    return <Observable<void>><any>Observable.throw(e);
-                }
-            } else
-                return <Observable<void>><any>Observable.throw(response_);
-        });
-    }
-
-    protected processDemoPost(response: HttpResponseBase): Observable<void> {
-        const status = response.status;
-        const responseBlob = 
-            response instanceof HttpResponse ? response.body : 
-            (<any>response).error instanceof Blob ? (<any>response).error : undefined;
-
-        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }};
-        if (status === 200) {
-            return blobToText(responseBlob).flatMap(_responseText => {
-            return Observable.of<void>(<any>null);
-            });
-        } else if (status !== 200 && status !== 204) {
-            return blobToText(responseBlob).flatMap(_responseText => {
-            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
-            });
-        }
-        return Observable.of<void>(<any>null);
     }
 
     /**
@@ -550,6 +304,58 @@ export class ApiServiceProxy {
     }
 
     protected processDemoDelete(response: HttpResponseBase): Observable<void> {
+        const status = response.status;
+        const responseBlob = 
+            response instanceof HttpResponse ? response.body : 
+            (<any>response).error instanceof Blob ? (<any>response).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }};
+        if (status === 200) {
+            return blobToText(responseBlob).flatMap(_responseText => {
+            return Observable.of<void>(<any>null);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).flatMap(_responseText => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Observable.of<void>(<any>null);
+    }
+
+    /**
+     * @value (optional) 
+     * @return Success
+     */
+    demoPost(value: string | null | undefined): Observable<void> {
+        let url_ = this.baseUrl + "/api/Demo";
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(value);
+
+        let options_ : any = {
+            body: content_,
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+                "Content-Type": "application/json", 
+            })
+        };
+
+        return this.http.request("post", url_, options_).flatMap((response_ : any) => {
+            return this.processDemoPost(response_);
+        }).catch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processDemoPost(<any>response_);
+                } catch (e) {
+                    return <Observable<void>><any>Observable.throw(e);
+                }
+            } else
+                return <Observable<void>><any>Observable.throw(response_);
+        });
+    }
+
+    protected processDemoPost(response: HttpResponseBase): Observable<void> {
         const status = response.status;
         const responseBlob = 
             response instanceof HttpResponse ? response.body : 
@@ -1001,7 +807,7 @@ export class ApiServiceProxy {
 }
 
 @Injectable()
-export class AuthServiceProxy {
+export class TasksServiceProxy {
     private http: HttpClient;
     private baseUrl: string;
     protected jsonParseReviver: ((key: string, value: any) => any) | undefined = undefined;
@@ -1012,21 +818,13 @@ export class AuthServiceProxy {
     }
 
     /**
-     * @rememberMe (optional) 
+     * @projectId (optional) 
      * @return Success
      */
-    login(email: string, password: string, rememberMe: boolean | null | undefined): Observable<void> {
-        let url_ = this.baseUrl + "/api/Auth/Login?";
-        if (email === undefined || email === null)
-            throw new Error("The parameter 'email' must be defined and cannot be null.");
-        else
-            url_ += "Email=" + encodeURIComponent("" + email) + "&"; 
-        if (password === undefined || password === null)
-            throw new Error("The parameter 'password' must be defined and cannot be null.");
-        else
-            url_ += "Password=" + encodeURIComponent("" + password) + "&"; 
-        if (rememberMe !== undefined)
-            url_ += "RememberMe=" + encodeURIComponent("" + rememberMe) + "&"; 
+    getTaskList(projectId: string | null | undefined): Observable<AppTaskList[]> {
+        let url_ = this.baseUrl + "/api/Tasks/GetTaskList/{projectId}?";
+        if (projectId !== undefined)
+            url_ += "projectId=" + encodeURIComponent("" + projectId) + "&"; 
         url_ = url_.replace(/[?&]$/, "");
 
         let options_ : any = {
@@ -1034,15 +832,75 @@ export class AuthServiceProxy {
             responseType: "blob",
             headers: new HttpHeaders({
                 "Content-Type": "application/json", 
+                "Accept": "application/json"
             })
         };
 
         return this.http.request("get", url_, options_).flatMap((response_ : any) => {
-            return this.processLogin(response_);
+            return this.processGetTaskList(response_);
         }).catch((response_: any) => {
             if (response_ instanceof HttpResponseBase) {
                 try {
-                    return this.processLogin(<any>response_);
+                    return this.processGetTaskList(<any>response_);
+                } catch (e) {
+                    return <Observable<AppTaskList[]>><any>Observable.throw(e);
+                }
+            } else
+                return <Observable<AppTaskList[]>><any>Observable.throw(response_);
+        });
+    }
+
+    protected processGetTaskList(response: HttpResponseBase): Observable<AppTaskList[]> {
+        const status = response.status;
+        const responseBlob = 
+            response instanceof HttpResponse ? response.body : 
+            (<any>response).error instanceof Blob ? (<any>response).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }};
+        if (status === 200) {
+            return blobToText(responseBlob).flatMap(_responseText => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            if (resultData200 && resultData200.constructor === Array) {
+                result200 = [];
+                for (let item of resultData200)
+                    result200.push(AppTaskList.fromJS(item));
+            }
+            return Observable.of(result200);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).flatMap(_responseText => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Observable.of<AppTaskList[]>(<any>null);
+    }
+
+    /**
+     * @dtoModel (optional) 
+     * @return Success
+     */
+    addTaskList(dtoModel: AddTaskListDto | null | undefined): Observable<void> {
+        let url_ = this.baseUrl + "/api/Tasks/AddTaskList";
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(dtoModel);
+
+        let options_ : any = {
+            body: content_,
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+                "Content-Type": "application/json", 
+            })
+        };
+
+        return this.http.request("post", url_, options_).flatMap((response_ : any) => {
+            return this.processAddTaskList(response_);
+        }).catch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processAddTaskList(<any>response_);
                 } catch (e) {
                     return <Observable<void>><any>Observable.throw(e);
                 }
@@ -1051,7 +909,7 @@ export class AuthServiceProxy {
         });
     }
 
-    protected processLogin(response: HttpResponseBase): Observable<void> {
+    protected processAddTaskList(response: HttpResponseBase): Observable<void> {
         const status = response.status;
         const responseBlob = 
             response instanceof HttpResponse ? response.body : 
@@ -1071,64 +929,344 @@ export class AuthServiceProxy {
     }
 }
 
-@Injectable()
-export class DemoServiceProxy {
-    private http: HttpClient;
-    private baseUrl: string;
-    protected jsonParseReviver: ((key: string, value: any) => any) | undefined = undefined;
+export class IFormFile implements IIFormFile {
+    contentType: string | undefined;
+    contentDisposition: string | undefined;
+    headers: { [key: string] : string[]; } | undefined;
+    length: number | undefined;
+    name: string | undefined;
+    fileName: string | undefined;
 
-    constructor(@Inject(HttpClient) http: HttpClient, @Optional() @Inject(API_BASE_URL) baseUrl?: string) {
-        this.http = http;
-        this.baseUrl = baseUrl ? baseUrl : "";
-    }
-
-    /**
-     * @return Success
-     */
-    getAll(): Observable<void> {
-        let url_ = this.baseUrl + "/api/Demo/GetAll";
-        url_ = url_.replace(/[?&]$/, "");
-
-        let options_ : any = {
-            observe: "response",
-            responseType: "blob",
-            headers: new HttpHeaders({
-                "Content-Type": "application/json", 
-            })
-        };
-
-        return this.http.request("get", url_, options_).flatMap((response_ : any) => {
-            return this.processGetAll(response_);
-        }).catch((response_: any) => {
-            if (response_ instanceof HttpResponseBase) {
-                try {
-                    return this.processGetAll(<any>response_);
-                } catch (e) {
-                    return <Observable<void>><any>Observable.throw(e);
-                }
-            } else
-                return <Observable<void>><any>Observable.throw(response_);
-        });
-    }
-
-    protected processGetAll(response: HttpResponseBase): Observable<void> {
-        const status = response.status;
-        const responseBlob = 
-            response instanceof HttpResponse ? response.body : 
-            (<any>response).error instanceof Blob ? (<any>response).error : undefined;
-
-        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }};
-        if (status === 200) {
-            return blobToText(responseBlob).flatMap(_responseText => {
-            return Observable.of<void>(<any>null);
-            });
-        } else if (status !== 200 && status !== 204) {
-            return blobToText(responseBlob).flatMap(_responseText => {
-            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
-            });
+    constructor(data?: IIFormFile) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
         }
-        return Observable.of<void>(<any>null);
     }
+
+    init(data?: any) {
+        if (data) {
+            this.contentType = data["contentType"];
+            this.contentDisposition = data["contentDisposition"];
+            if (data["headers"]) {
+                this.headers = {};
+                for (let key in data["headers"]) {
+                    if (data["headers"].hasOwnProperty(key))
+                        this.headers[key] = data["headers"][key];
+                }
+            }
+            this.length = data["length"];
+            this.name = data["name"];
+            this.fileName = data["fileName"];
+        }
+    }
+
+    static fromJS(data: any): IFormFile {
+        data = typeof data === 'object' ? data : {};
+        let result = new IFormFile();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["contentType"] = this.contentType;
+        data["contentDisposition"] = this.contentDisposition;
+        if (this.headers) {
+            data["headers"] = {};
+            for (let key in this.headers) {
+                if (this.headers.hasOwnProperty(key))
+                    data["headers"][key] = this.headers[key];
+            }
+        }
+        data["length"] = this.length;
+        data["name"] = this.name;
+        data["fileName"] = this.fileName;
+        return data; 
+    }
+
+    clone() {
+        const json = this.toJSON();
+        let result = new IFormFile();
+        result.init(json);
+        return result;
+    }
+}
+
+export interface IIFormFile {
+    contentType: string | undefined;
+    contentDisposition: string | undefined;
+    headers: { [key: string] : string[]; } | undefined;
+    length: number | undefined;
+    name: string | undefined;
+    fileName: string | undefined;
+}
+
+export class AppTaskList implements IAppTaskList {
+    name: string | undefined;
+    desc: string | undefined;
+    projectMaps: AppProjectToTaskListMap[] | undefined;
+    taskListMaps: AppTaskListTaskMap[] | undefined;
+    id: string | undefined;
+    appId: number | undefined;
+    appInfo: AppInfo | undefined;
+    createUserId: string | undefined;
+    createTime: moment.Moment | undefined;
+    lastModifiedUId: string | undefined;
+    lastModifiedTime: moment.Moment | undefined;
+
+    constructor(data?: IAppTaskList) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(data?: any) {
+        if (data) {
+            this.name = data["name"];
+            this.desc = data["desc"];
+            if (data["projectMaps"] && data["projectMaps"].constructor === Array) {
+                this.projectMaps = [];
+                for (let item of data["projectMaps"])
+                    this.projectMaps.push(AppProjectToTaskListMap.fromJS(item));
+            }
+            if (data["taskListMaps"] && data["taskListMaps"].constructor === Array) {
+                this.taskListMaps = [];
+                for (let item of data["taskListMaps"])
+                    this.taskListMaps.push(AppTaskListTaskMap.fromJS(item));
+            }
+            this.id = data["id"];
+            this.appId = data["appId"];
+            this.appInfo = data["appInfo"] ? AppInfo.fromJS(data["appInfo"]) : <any>undefined;
+            this.createUserId = data["createUserId"];
+            this.createTime = data["createTime"] ? moment(data["createTime"].toString()) : <any>undefined;
+            this.lastModifiedUId = data["lastModifiedUId"];
+            this.lastModifiedTime = data["lastModifiedTime"] ? moment(data["lastModifiedTime"].toString()) : <any>undefined;
+        }
+    }
+
+    static fromJS(data: any): AppTaskList {
+        data = typeof data === 'object' ? data : {};
+        let result = new AppTaskList();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["name"] = this.name;
+        data["desc"] = this.desc;
+        if (this.projectMaps && this.projectMaps.constructor === Array) {
+            data["projectMaps"] = [];
+            for (let item of this.projectMaps)
+                data["projectMaps"].push(item.toJSON());
+        }
+        if (this.taskListMaps && this.taskListMaps.constructor === Array) {
+            data["taskListMaps"] = [];
+            for (let item of this.taskListMaps)
+                data["taskListMaps"].push(item.toJSON());
+        }
+        data["id"] = this.id;
+        data["appId"] = this.appId;
+        data["appInfo"] = this.appInfo ? this.appInfo.toJSON() : <any>undefined;
+        data["createUserId"] = this.createUserId;
+        data["createTime"] = this.createTime ? this.createTime.toISOString() : <any>undefined;
+        data["lastModifiedUId"] = this.lastModifiedUId;
+        data["lastModifiedTime"] = this.lastModifiedTime ? this.lastModifiedTime.toISOString() : <any>undefined;
+        return data; 
+    }
+
+    clone() {
+        const json = this.toJSON();
+        let result = new AppTaskList();
+        result.init(json);
+        return result;
+    }
+}
+
+export interface IAppTaskList {
+    name: string | undefined;
+    desc: string | undefined;
+    projectMaps: AppProjectToTaskListMap[] | undefined;
+    taskListMaps: AppTaskListTaskMap[] | undefined;
+    id: string | undefined;
+    appId: number | undefined;
+    appInfo: AppInfo | undefined;
+    createUserId: string | undefined;
+    createTime: moment.Moment | undefined;
+    lastModifiedUId: string | undefined;
+    lastModifiedTime: moment.Moment | undefined;
+}
+
+export class AppProjectToTaskListMap implements IAppProjectToTaskListMap {
+    projectId: string | undefined;
+    project: AppProject | undefined;
+    taskListId: string | undefined;
+    taskList: AppTaskList | undefined;
+    id: string | undefined;
+    appId: number | undefined;
+    appInfo: AppInfo | undefined;
+    createUserId: string | undefined;
+    createTime: moment.Moment | undefined;
+    lastModifiedUId: string | undefined;
+    lastModifiedTime: moment.Moment | undefined;
+
+    constructor(data?: IAppProjectToTaskListMap) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(data?: any) {
+        if (data) {
+            this.projectId = data["projectId"];
+            this.project = data["project"] ? AppProject.fromJS(data["project"]) : <any>undefined;
+            this.taskListId = data["taskListId"];
+            this.taskList = data["taskList"] ? AppTaskList.fromJS(data["taskList"]) : <any>undefined;
+            this.id = data["id"];
+            this.appId = data["appId"];
+            this.appInfo = data["appInfo"] ? AppInfo.fromJS(data["appInfo"]) : <any>undefined;
+            this.createUserId = data["createUserId"];
+            this.createTime = data["createTime"] ? moment(data["createTime"].toString()) : <any>undefined;
+            this.lastModifiedUId = data["lastModifiedUId"];
+            this.lastModifiedTime = data["lastModifiedTime"] ? moment(data["lastModifiedTime"].toString()) : <any>undefined;
+        }
+    }
+
+    static fromJS(data: any): AppProjectToTaskListMap {
+        data = typeof data === 'object' ? data : {};
+        let result = new AppProjectToTaskListMap();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["projectId"] = this.projectId;
+        data["project"] = this.project ? this.project.toJSON() : <any>undefined;
+        data["taskListId"] = this.taskListId;
+        data["taskList"] = this.taskList ? this.taskList.toJSON() : <any>undefined;
+        data["id"] = this.id;
+        data["appId"] = this.appId;
+        data["appInfo"] = this.appInfo ? this.appInfo.toJSON() : <any>undefined;
+        data["createUserId"] = this.createUserId;
+        data["createTime"] = this.createTime ? this.createTime.toISOString() : <any>undefined;
+        data["lastModifiedUId"] = this.lastModifiedUId;
+        data["lastModifiedTime"] = this.lastModifiedTime ? this.lastModifiedTime.toISOString() : <any>undefined;
+        return data; 
+    }
+
+    clone() {
+        const json = this.toJSON();
+        let result = new AppProjectToTaskListMap();
+        result.init(json);
+        return result;
+    }
+}
+
+export interface IAppProjectToTaskListMap {
+    projectId: string | undefined;
+    project: AppProject | undefined;
+    taskListId: string | undefined;
+    taskList: AppTaskList | undefined;
+    id: string | undefined;
+    appId: number | undefined;
+    appInfo: AppInfo | undefined;
+    createUserId: string | undefined;
+    createTime: moment.Moment | undefined;
+    lastModifiedUId: string | undefined;
+    lastModifiedTime: moment.Moment | undefined;
+}
+
+export class AppTaskListTaskMap implements IAppTaskListTaskMap {
+    taskListId: string | undefined;
+    taskId: string | undefined;
+    appTaskList: AppTaskList | undefined;
+    appTask: AppTask | undefined;
+    id: string | undefined;
+    appId: number | undefined;
+    appInfo: AppInfo | undefined;
+    createUserId: string | undefined;
+    createTime: moment.Moment | undefined;
+    lastModifiedUId: string | undefined;
+    lastModifiedTime: moment.Moment | undefined;
+
+    constructor(data?: IAppTaskListTaskMap) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(data?: any) {
+        if (data) {
+            this.taskListId = data["taskListId"];
+            this.taskId = data["taskId"];
+            this.appTaskList = data["appTaskList"] ? AppTaskList.fromJS(data["appTaskList"]) : <any>undefined;
+            this.appTask = data["appTask"] ? AppTask.fromJS(data["appTask"]) : <any>undefined;
+            this.id = data["id"];
+            this.appId = data["appId"];
+            this.appInfo = data["appInfo"] ? AppInfo.fromJS(data["appInfo"]) : <any>undefined;
+            this.createUserId = data["createUserId"];
+            this.createTime = data["createTime"] ? moment(data["createTime"].toString()) : <any>undefined;
+            this.lastModifiedUId = data["lastModifiedUId"];
+            this.lastModifiedTime = data["lastModifiedTime"] ? moment(data["lastModifiedTime"].toString()) : <any>undefined;
+        }
+    }
+
+    static fromJS(data: any): AppTaskListTaskMap {
+        data = typeof data === 'object' ? data : {};
+        let result = new AppTaskListTaskMap();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["taskListId"] = this.taskListId;
+        data["taskId"] = this.taskId;
+        data["appTaskList"] = this.appTaskList ? this.appTaskList.toJSON() : <any>undefined;
+        data["appTask"] = this.appTask ? this.appTask.toJSON() : <any>undefined;
+        data["id"] = this.id;
+        data["appId"] = this.appId;
+        data["appInfo"] = this.appInfo ? this.appInfo.toJSON() : <any>undefined;
+        data["createUserId"] = this.createUserId;
+        data["createTime"] = this.createTime ? this.createTime.toISOString() : <any>undefined;
+        data["lastModifiedUId"] = this.lastModifiedUId;
+        data["lastModifiedTime"] = this.lastModifiedTime ? this.lastModifiedTime.toISOString() : <any>undefined;
+        return data; 
+    }
+
+    clone() {
+        const json = this.toJSON();
+        let result = new AppTaskListTaskMap();
+        result.init(json);
+        return result;
+    }
+}
+
+export interface IAppTaskListTaskMap {
+    taskListId: string | undefined;
+    taskId: string | undefined;
+    appTaskList: AppTaskList | undefined;
+    appTask: AppTask | undefined;
+    id: string | undefined;
+    appId: number | undefined;
+    appInfo: AppInfo | undefined;
+    createUserId: string | undefined;
+    createTime: moment.Moment | undefined;
+    lastModifiedUId: string | undefined;
+    lastModifiedTime: moment.Moment | undefined;
 }
 
 export class AppInfo implements IAppInfo {
@@ -1210,6 +1348,208 @@ export interface IAppInfo {
     lastModifiedTime: moment.Moment | undefined;
 }
 
+export class AppProject implements IAppProject {
+    name: string | undefined;
+    desc: string | undefined;
+    coverUrl: string | undefined;
+    ownerUserId: string | undefined;
+    taskListMaps: AppProjectToTaskListMap[] | undefined;
+    id: string | undefined;
+    appId: number | undefined;
+    appInfo: AppInfo | undefined;
+    createUserId: string | undefined;
+    createTime: moment.Moment | undefined;
+    lastModifiedUId: string | undefined;
+    lastModifiedTime: moment.Moment | undefined;
+
+    constructor(data?: IAppProject) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(data?: any) {
+        if (data) {
+            this.name = data["name"];
+            this.desc = data["desc"];
+            this.coverUrl = data["coverUrl"];
+            this.ownerUserId = data["ownerUserId"];
+            if (data["taskListMaps"] && data["taskListMaps"].constructor === Array) {
+                this.taskListMaps = [];
+                for (let item of data["taskListMaps"])
+                    this.taskListMaps.push(AppProjectToTaskListMap.fromJS(item));
+            }
+            this.id = data["id"];
+            this.appId = data["appId"];
+            this.appInfo = data["appInfo"] ? AppInfo.fromJS(data["appInfo"]) : <any>undefined;
+            this.createUserId = data["createUserId"];
+            this.createTime = data["createTime"] ? moment(data["createTime"].toString()) : <any>undefined;
+            this.lastModifiedUId = data["lastModifiedUId"];
+            this.lastModifiedTime = data["lastModifiedTime"] ? moment(data["lastModifiedTime"].toString()) : <any>undefined;
+        }
+    }
+
+    static fromJS(data: any): AppProject {
+        data = typeof data === 'object' ? data : {};
+        let result = new AppProject();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["name"] = this.name;
+        data["desc"] = this.desc;
+        data["coverUrl"] = this.coverUrl;
+        data["ownerUserId"] = this.ownerUserId;
+        if (this.taskListMaps && this.taskListMaps.constructor === Array) {
+            data["taskListMaps"] = [];
+            for (let item of this.taskListMaps)
+                data["taskListMaps"].push(item.toJSON());
+        }
+        data["id"] = this.id;
+        data["appId"] = this.appId;
+        data["appInfo"] = this.appInfo ? this.appInfo.toJSON() : <any>undefined;
+        data["createUserId"] = this.createUserId;
+        data["createTime"] = this.createTime ? this.createTime.toISOString() : <any>undefined;
+        data["lastModifiedUId"] = this.lastModifiedUId;
+        data["lastModifiedTime"] = this.lastModifiedTime ? this.lastModifiedTime.toISOString() : <any>undefined;
+        return data; 
+    }
+
+    clone() {
+        const json = this.toJSON();
+        let result = new AppProject();
+        result.init(json);
+        return result;
+    }
+}
+
+export interface IAppProject {
+    name: string | undefined;
+    desc: string | undefined;
+    coverUrl: string | undefined;
+    ownerUserId: string | undefined;
+    taskListMaps: AppProjectToTaskListMap[] | undefined;
+    id: string | undefined;
+    appId: number | undefined;
+    appInfo: AppInfo | undefined;
+    createUserId: string | undefined;
+    createTime: moment.Moment | undefined;
+    lastModifiedUId: string | undefined;
+    lastModifiedTime: moment.Moment | undefined;
+}
+
+export class AppTask implements IAppTask {
+    name: string | undefined;
+    assignTo: string | undefined;
+    deadLine: moment.Moment | undefined;
+    priority: AppPriority | undefined;
+    note: string | undefined;
+    comment: string | undefined;
+    orderNo: number | undefined;
+    listTaskMaps: AppTaskListTaskMap[] | undefined;
+    id: string | undefined;
+    appId: number | undefined;
+    appInfo: AppInfo | undefined;
+    createUserId: string | undefined;
+    createTime: moment.Moment | undefined;
+    lastModifiedUId: string | undefined;
+    lastModifiedTime: moment.Moment | undefined;
+
+    constructor(data?: IAppTask) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(data?: any) {
+        if (data) {
+            this.name = data["name"];
+            this.assignTo = data["assignTo"];
+            this.deadLine = data["deadLine"] ? moment(data["deadLine"].toString()) : <any>undefined;
+            this.priority = data["priority"] ? AppPriority.fromJS(data["priority"]) : <any>undefined;
+            this.note = data["note"];
+            this.comment = data["comment"];
+            this.orderNo = data["orderNo"];
+            if (data["listTaskMaps"] && data["listTaskMaps"].constructor === Array) {
+                this.listTaskMaps = [];
+                for (let item of data["listTaskMaps"])
+                    this.listTaskMaps.push(AppTaskListTaskMap.fromJS(item));
+            }
+            this.id = data["id"];
+            this.appId = data["appId"];
+            this.appInfo = data["appInfo"] ? AppInfo.fromJS(data["appInfo"]) : <any>undefined;
+            this.createUserId = data["createUserId"];
+            this.createTime = data["createTime"] ? moment(data["createTime"].toString()) : <any>undefined;
+            this.lastModifiedUId = data["lastModifiedUId"];
+            this.lastModifiedTime = data["lastModifiedTime"] ? moment(data["lastModifiedTime"].toString()) : <any>undefined;
+        }
+    }
+
+    static fromJS(data: any): AppTask {
+        data = typeof data === 'object' ? data : {};
+        let result = new AppTask();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["name"] = this.name;
+        data["assignTo"] = this.assignTo;
+        data["deadLine"] = this.deadLine ? this.deadLine.toISOString() : <any>undefined;
+        data["priority"] = this.priority ? this.priority.toJSON() : <any>undefined;
+        data["note"] = this.note;
+        data["comment"] = this.comment;
+        data["orderNo"] = this.orderNo;
+        if (this.listTaskMaps && this.listTaskMaps.constructor === Array) {
+            data["listTaskMaps"] = [];
+            for (let item of this.listTaskMaps)
+                data["listTaskMaps"].push(item.toJSON());
+        }
+        data["id"] = this.id;
+        data["appId"] = this.appId;
+        data["appInfo"] = this.appInfo ? this.appInfo.toJSON() : <any>undefined;
+        data["createUserId"] = this.createUserId;
+        data["createTime"] = this.createTime ? this.createTime.toISOString() : <any>undefined;
+        data["lastModifiedUId"] = this.lastModifiedUId;
+        data["lastModifiedTime"] = this.lastModifiedTime ? this.lastModifiedTime.toISOString() : <any>undefined;
+        return data; 
+    }
+
+    clone() {
+        const json = this.toJSON();
+        let result = new AppTask();
+        result.init(json);
+        return result;
+    }
+}
+
+export interface IAppTask {
+    name: string | undefined;
+    assignTo: string | undefined;
+    deadLine: moment.Moment | undefined;
+    priority: AppPriority | undefined;
+    note: string | undefined;
+    comment: string | undefined;
+    orderNo: number | undefined;
+    listTaskMaps: AppTaskListTaskMap[] | undefined;
+    id: string | undefined;
+    appId: number | undefined;
+    appInfo: AppInfo | undefined;
+    createUserId: string | undefined;
+    createTime: moment.Moment | undefined;
+    lastModifiedUId: string | undefined;
+    lastModifiedTime: moment.Moment | undefined;
+}
+
 export class Tenant implements ITenant {
     id: number | undefined;
     name: string | undefined;
@@ -1285,15 +1625,15 @@ export interface ITenant {
     lastModifyUserId: string | undefined;
 }
 
-export class IFormFile implements IIFormFile {
-    contentType: string | undefined;
-    contentDisposition: string | undefined;
-    headers: { [key: string] : string[]; } | undefined;
-    length: number | undefined;
+export class AppPriority implements IAppPriority {
     name: string | undefined;
-    fileName: string | undefined;
+    urgency: number | undefined;
+    color: string | undefined;
+    id: string | undefined;
+    appId: number | undefined;
+    appInfo: AppInfo | undefined;
 
-    constructor(data?: IIFormFile) {
+    constructor(data?: IAppPriority) {
         if (data) {
             for (var property in data) {
                 if (data.hasOwnProperty(property))
@@ -1304,60 +1644,95 @@ export class IFormFile implements IIFormFile {
 
     init(data?: any) {
         if (data) {
-            this.contentType = data["contentType"];
-            this.contentDisposition = data["contentDisposition"];
-            if (data["headers"]) {
-                this.headers = {};
-                for (let key in data["headers"]) {
-                    if (data["headers"].hasOwnProperty(key))
-                        this.headers[key] = data["headers"][key];
-                }
-            }
-            this.length = data["length"];
             this.name = data["name"];
-            this.fileName = data["fileName"];
+            this.urgency = data["urgency"];
+            this.color = data["color"];
+            this.id = data["id"];
+            this.appId = data["appId"];
+            this.appInfo = data["appInfo"] ? AppInfo.fromJS(data["appInfo"]) : <any>undefined;
         }
     }
 
-    static fromJS(data: any): IFormFile {
+    static fromJS(data: any): AppPriority {
         data = typeof data === 'object' ? data : {};
-        let result = new IFormFile();
+        let result = new AppPriority();
         result.init(data);
         return result;
     }
 
     toJSON(data?: any) {
         data = typeof data === 'object' ? data : {};
-        data["contentType"] = this.contentType;
-        data["contentDisposition"] = this.contentDisposition;
-        if (this.headers) {
-            data["headers"] = {};
-            for (let key in this.headers) {
-                if (this.headers.hasOwnProperty(key))
-                    data["headers"][key] = this.headers[key];
-            }
-        }
-        data["length"] = this.length;
         data["name"] = this.name;
-        data["fileName"] = this.fileName;
+        data["urgency"] = this.urgency;
+        data["color"] = this.color;
+        data["id"] = this.id;
+        data["appId"] = this.appId;
+        data["appInfo"] = this.appInfo ? this.appInfo.toJSON() : <any>undefined;
         return data; 
     }
 
     clone() {
         const json = this.toJSON();
-        let result = new IFormFile();
+        let result = new AppPriority();
         result.init(json);
         return result;
     }
 }
 
-export interface IIFormFile {
-    contentType: string | undefined;
-    contentDisposition: string | undefined;
-    headers: { [key: string] : string[]; } | undefined;
-    length: number | undefined;
+export interface IAppPriority {
     name: string | undefined;
-    fileName: string | undefined;
+    urgency: number | undefined;
+    color: string | undefined;
+    id: string | undefined;
+    appId: number | undefined;
+    appInfo: AppInfo | undefined;
+}
+
+export class AddTaskListDto implements IAddTaskListDto {
+    name: string | undefined;
+    projectId: string | undefined;
+
+    constructor(data?: IAddTaskListDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(data?: any) {
+        if (data) {
+            this.name = data["name"];
+            this.projectId = data["projectId"];
+        }
+    }
+
+    static fromJS(data: any): AddTaskListDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new AddTaskListDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["name"] = this.name;
+        data["projectId"] = this.projectId;
+        return data; 
+    }
+
+    clone() {
+        const json = this.toJSON();
+        let result = new AddTaskListDto();
+        result.init(json);
+        return result;
+    }
+}
+
+export interface IAddTaskListDto {
+    name: string | undefined;
+    projectId: string | undefined;
 }
 
 export class AppUserFolder implements IAppUserFolder {

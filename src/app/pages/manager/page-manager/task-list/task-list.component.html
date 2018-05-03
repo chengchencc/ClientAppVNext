@@ -1,0 +1,42 @@
+<div class="task-list-wrapper">
+    <div class="task-list">
+        <div class="task-list-header">
+
+            <input type="text" class="form-control" name="listheader" aria-describedby="helpId" placeholder="" value="{{taskList.name}}">
+
+            <!-- <button class="btn btn-nostyle text-dark float-left"><i class="fas fa-chevron-down"></i></button> -->
+            <div class="dropdown" dropdown>
+
+                <button class="btn btn-nostyle text-dark float-left dropdown-toggle" dropdownToggle type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="fas fa-chevron-down"></i></button>
+
+                <div class="dropdown-menu" aria-labelledby="dropdownMenuButton" *dropdownMenu>
+                    <a class="dropdown-item" href="#">Action</a>
+                    <a class="dropdown-item" href="#">Another action</a>
+                    <a class="dropdown-item" href="#">Something else here</a>
+                </div>
+            </div>
+
+        </div>
+        <ul class="task-list-body thin-scroll" [dragula]='"task"'>
+            <li class="card task" *ngFor="let taskListMap of taskList.taskListMaps;">
+                <!-- <img src="../../../../assets/images/demo/camera1.jpg" alt="" class="card-img-top"> -->
+                <div class="card-body">
+                    <!-- <div class="card-title">title</div> -->
+                    <p class="card-text">{{taskListMap.appTask.name}}</p>
+                </div>
+            </li>
+            <!-- create new task -->
+            <li class="card task">
+                <div class="card-body" *ngIf="isAddingTask">
+                    <!-- <div class="card-title">title</div> -->
+                    <input type="text" #addTaskName class="form-control" name="taskName" aria-describedby="helpId" placeholder="任务名称" value="">
+
+                    <button class="btn btn-primary" (click)="addTask(taskList,addTaskName);">保存</button>
+                    <button class="btn btn-light" (click)="isAddingTask=false;">取消</button>
+                </div>
+                <button *ngIf="!isAddingTask" type="button" name="createtask" class="btn btn-primary btn-block" (click)="isAddingTask=true;">增加任务</button>
+            </li>
+        </ul>
+
+    </div>
+</div>

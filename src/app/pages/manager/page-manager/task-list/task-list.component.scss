@@ -1,30 +1,3 @@
-@import '../../../theme/bootstrap/scss/bootstrap-reboot.scss';
-@import '../../../../../node_modules/dragula/dist/dragula.css';
-// @import '../../../theme/bootstrap/scss/_card.scss';
-.board {
-    display: flex;
-    height: 100%;
-    width: 100%;
-    flex-direction: column;
-    // background-color: $secondary;
-    // background-image: url(https://trello-backgrounds.s3.amazonaws.com/SharedBackground/2560x1579/8eac3fe8893a8c3f08f4ebcf40d60dc0/photo-1523897056079-5553b57112d4);
-    background-size: 100%;
-}
-
-.board-header {}
-
-.board-toolbar {
-    display: flex;
-}
-
-.board-content {
-    height: 100%;
-    display: flex;
-    flex-direction: row;
-    align-items: stretch;
-    padding: 0px 5px 5px 5px;
-}
-
 .task-list-wrapper {
     // height: 100%;
     // width: 25%;

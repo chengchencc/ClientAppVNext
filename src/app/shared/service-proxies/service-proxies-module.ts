@@ -11,9 +11,10 @@ import { API_BASE_URL } from './service-proxies';
     ],
     declarations: [  ],
     providers:[
-        ApiSP.AppCrudServiceProxy,
+        // ApiSP.AppCrudServiceProxy,
         ApiSP.AuthServiceProxy,
         ApiSP.DemoServiceProxy,
+        ApiSP.TasksServiceProxy,
         httpInterceptorProviders,
         {provide:API_BASE_URL,useValue:AppConfig.API_BASE_URL}    
     ]

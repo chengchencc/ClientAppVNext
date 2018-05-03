@@ -11,7 +11,7 @@
       "className": "{controller}ServiceProxy",
       "moduleName": "",
       "namespace": "",
-      "typeScriptVersion": 2.7,
+      "typeScriptVersion": 2.0,
       "template": "Angular",
       "promiseType": "Promise",
 	  "httpClass": "HttpClient",

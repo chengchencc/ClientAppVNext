@@ -8,6 +8,9 @@ import { PageManagerComponent } from './page-manager/page-manager.component';
 import { SharedModule } from '../../shared/shared.module';
 
 import{ DragulaModule} from 'ng2-dragula';
+import { ManagerService } from './manager.service';
+import { TaskListComponent } from './page-manager/task-list/task-list.component';
+import { NgxBootstrapModule } from '../../shared/ngxBootstrap.module';
 
 
 @NgModule({
@@ -15,13 +18,18 @@ import{ DragulaModule} from 'ng2-dragula';
     CommonModule,
     SharedModule,
     DragulaModule,
-    ManagerRoutingModule
+    ManagerRoutingModule,
+    NgxBootstrapModule
   ],
   declarations: [
     ManagerComponent,
     DashboardComponent,
     NgxEchartsDirective,
-    PageManagerComponent
+    PageManagerComponent,
+    TaskListComponent
+],
+providers:[
+  ManagerService
 ]
 })
 export class ManagerModule { }

@@ -17,6 +17,9 @@ import { httpInterceptorProviders } from './Interceptor/http-interceptor-provide
 import { AppConfig } from './app-config';
 import { ServiceProxiesModule } from './service-proxies/service-proxies-module';
 import { BodyDirective } from './directives/body.directive';
+import { FocusDirective } from './directives/focus.directive';
+import { OutContainerClickDirective } from './directives/out-container-click.directive';
+import { serializePath } from '@angular/router/src/url_tree';
 
 
 @NgModule({
@@ -29,11 +32,18 @@ import { BodyDirective } from './directives/body.directive';
     declarations: [ 
         IconComponent,
         FileSizePipe,
-        BodyDirective
+        BodyDirective,
+        FocusDirective,
+        OutContainerClickDirective
      ],
      exports:[
          IconComponent,
-         FileSizePipe
+         FileSizePipe,
+         BodyDirective,
+         FocusDirective,
+         OutContainerClickDirective,
+         ServiceProxiesModule
+         
         ],
      providers:[
         AlertService,

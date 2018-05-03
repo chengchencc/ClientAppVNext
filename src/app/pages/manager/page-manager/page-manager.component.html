@@ -1,18 +1,3 @@
-<!-- <div>
-    <div class='wrapper'>
-        <div class='container' [dragula]='"first-bag"'>
-            <div>You can move these elements between these two containers</div>
-            <div>Moving them anywhere else isn't quite possible</div>
-            <div>There's also the possibility of moving elements around in the same container, changing their position</div>
-        </div>
-        <div class='container' [dragula]='"first-bag"'>
-            <div>This is the default use case. You only need to specify the containers you want to use</div>
-            <div>More interactive use cases lie ahead</div>
-            <div>Make sure to check out the <a href='https://github.com/bevacqua/dragula#readme'>documentation on GitHub!</a></div>
-        </div>
-    </div>
-</div> -->
-
 <div class="board bg-primary">
 
     <div class="board-header text-center text-light">
@@ -39,85 +24,32 @@
 
     <div class="board-content thin-scroll" [dragula]='"task-list"' [dragulaOptions]="taskListDragOptions">
 
-        <div class="task-list-wrapper">
+        <app-task-list *ngFor="let taskList of taskListViewModel" [taskList]="taskList"></app-task-list>
+
+        <!-- create task list -->
+
+        <div class="task-list-wrapper task-list-create" [class.active]="isAddingTaskList" outclick (onOutClick)="onCancle($event);" [isFirst]="isAdding">
             <div class="task-list">
-                <div class="task-list-header">
-                    <h5>计划</h5>
-                    <button class="btn btn-nostyle text-dark float-left"><i class="fas fa-chevron-down"></i></button>
-                </div>
-                <ul class="task-list-body thin-scroll" [dragula]='"task"'>
-                    <li class="card task" *ngFor="let item of [1,2,3,4,5,6,7]">
-                        <!-- <img src="../../../../assets/images/demo/camera1.jpg" alt="" class="card-img-top"> -->
-                        <div class="card-body">
-                            <div class="card-title">title</div>
-                            <p>这是内容</p>
+
+                <button type="button" name="createtask" class="btn btn-light btn-block" *ngIf="!isAddingTaskList" (click)="isAddingTaskList = true;">增加任务</button>
+
+                <div class="task-list-header" *ngIf="isAddingTaskList">
+
+                    <!-- <div class="input-group mb-3">
+                        <input type="text" class="form-control" placeholder="Recipient's username" aria-label="Recipient's username" aria-describedby="basic-addon2">
+                        <div class="input-group-append">
+                            <button class="btn btn-outline-secondary" type="button">Button</button>
                         </div>
-                    </li>
-                </ul>
-            </div>
-        </div>
-        <div class="task-list-wrapper">
-            <div class="task-list">
-                <div class="task-list-header">
-                    <h5>计划</h5>
+                    </div> -->
+
+                    <input type="text" #taskListName class="form-control" [focus]="focusInput" name="listheader" aria-describedby="helpId" placeholder="任务列表名称" value="">
+
+                    <button class="btn btn-primary text-white btn-sm" (click)="onAddTaskListClick(taskListName)">添加</button>
                 </div>
-                <ul class="task-list-body thin-scroll" [dragula]='"task"'>
-                    <li class="card task" *ngFor="let item of [1,2,3,4]">
-                        <!-- <img src="../../../../assets/images/demo/camera1.jpg" alt="" class="card-img-top"> -->
-                        <div class="card-body">
-                            <div class="card-title">title</div>
-                            <p>这是内容</p>
-                        </div>
-                    </li>
-                </ul>
-            </div>
-        </div>
-        <div class="task-list-wrapper">
-            <div class="task-list">
-                <div class="task-list-header">
-                    <h5>计划</h5>
-                </div>
-                <ul class="task-list-body thin-scroll" [dragula]='"task"'>
-                    <li class="card task" *ngFor="let item of [1,2,3]">
-                        <!-- <img src="../../../../assets/images/demo/camera1.jpg" alt="" class="card-img-top"> -->
-                        <div class="card-body">
-                            <div class="card-title">title</div>
-                            <p>这是内容</p>
-                        </div>
-                    </li>
-                </ul>
-            </div>
-        </div>
-        <div class="task-list-wrapper">
-            <div class="task-list">
-                <div class="task-list-header">
-                    <h5>计划</h5>
-                </div>
-                <ul class="task-list-body thin-scroll" [dragula]='"task"'>
-                    <li class="card task" *ngFor="let item of [1,2]">
-                        <!-- <img src="../../../../assets/images/demo/camera1.jpg" alt="" class="card-img-top"> -->
-                        <div class="card-body">
-                            <div class="card-title">title</div>
-                            <p>这是内容</p>
-                        </div>
-                    </li>
-                </ul>
-            </div>
-        </div>
-        <div class="task-list-wrapper">
-            <div class="task-list">
-                <div class="task-list-header">
-                    <h5>计划</h5>
-                </div>
-                <ul class="task-list-body thin-scroll" [dragula]='"task"'>
-                    <li class="card task" *ngFor="let item of [1,2,3]">
-                        <!-- <img src="../../../../assets/images/demo/camera1.jpg" alt="" class="card-img-top"> -->
-                        <div class="card-body">
-                            <div class="card-title">title</div>
-                            <p>这是内容</p>
-                        </div>
-                    </li>
-                </ul>
+                <!-- <ul class="task-list-body thin-scroll" [dragula]='"task"'>
+
+                </ul> -->
+
             </div>
         </div>
 
